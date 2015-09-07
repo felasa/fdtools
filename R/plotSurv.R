@@ -1,3 +1,4 @@
+
 plotSurv <- function(survobj,                      
                      CI = TRUE,                     
                      legend.text = NULL, 
@@ -18,7 +19,9 @@ plotSurv <- function(survobj,
                      ...) {
   require(ggplot2)
   require(survival)
+  require(grid)
   require(gridExtra)
+
   p <- NULL
   num.cat = ifelse(is.null(survobj$strata), 1 , length(survobj$strata) )
   n <- survobj$strata
@@ -177,6 +180,7 @@ plotSurv <- function(survobj,
 ## Function used to align plots, separate in case needed
 
 plotAlign <- function(q,p) {
+  require(grid)
   gA <- ggplotGrob(q)
   gB <- ggplotGrob(p)
   maxWidth = grid::unit.pmax(gA$widths, gB$widths)
