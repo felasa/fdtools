@@ -1,4 +1,3 @@
-
 plotSurv <- function(survobj,                      
                      CI = TRUE,                     
                      legend.text = NULL, 
@@ -124,7 +123,13 @@ plotSurv <- function(survobj,
   }    
   
   q <- q + theme(axis.title.x = element_blank(), text = element_text(size = element.text.size))
-   
+  
+  if (!makeTable) {
+    return(q)
+  }
+  
+  else if (makeTable) {
+  
   #Extract appropiate times from survfit
   times <- ggplot_build(q)$panel$ranges[[1]]$x.minor_source  
   sum.obj <- summary(survobj, times=times, extend=TRUE)
@@ -136,7 +141,6 @@ plotSurv <- function(survobj,
                          n.event = sum.obj$n.event )
   
   #Build the table plot
-  
   table.df$shift <- (table.df$time[2] - table.df$time[1])/2
   # Reverse table group order to be consistent with legends.
   table.df$grupo <- factor(table.df$grupo, levels = rev(levels(table.df$grupo)))
@@ -171,10 +175,9 @@ plotSurv <- function(survobj,
                    axis.ticks.y = element_blank(), text = element_text(size = element.text.size))
   }  
    
-    if (returnPlots) return(value  =list(curve = q,table = p))
-  
+    if (returnPlots) return(value = list(curve = q,table = p))  
     plotAlign(q,p)  
-  
+  }
 }
 
 ## Function used to align plots, separate in case needed
