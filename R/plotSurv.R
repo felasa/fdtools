@@ -4,7 +4,7 @@ plotSurv <- function(survobj,
                      lsize = NULL, 
                      csize = NULL,
                      title = "",
-                     xlab = "",
+                     xlab = "time",
                      ylab = "",
                      table.text.size = 4,
                      element.text.size = 17,
@@ -71,11 +71,13 @@ plotSurv <- function(survobj,
   xrange = range(df$time)
   
   #we build the curve plot
-  q <- ggplot(data = df, aes(x = time, y = Survival, ymin = lower, ymax = upper, color = grupo)) 
+  q <- 
+    ggplot(data = df, 
+           aes(x = time, y = Survival, 
+               ymin = lower, ymax = upper, 
+               color = grupo))   
   
-  #Add extra stuff to curve?
-  if (!is.null(ggargsCurve)) eval(parse(text=paste("q <- q +", ggargsCurve)))
-  
+  #
   q <- q +
     geom_step(size = 1) +         
     scale_shape_discrete(guide = FALSE)+ 
@@ -98,6 +100,15 @@ plotSurv <- function(survobj,
     q <- q + geom_vline(xintercept = medianas, linetype = 2)
   }
   
+  # If needed, custom legends
+  if (!is.null(legend.text)) {
+    q <- q + scale_colour_discrete(labels = legend.text) + 
+      scale_linetype_discrete(labels = legend.text)
+  }    
+  
+  #q <- q + theme(axis.title.x = element_blank(), text = element_text(size = element.text.size))
+  q <- q + xlab("")
+  
   # add pvalue
   if (pval && num.cat > 1) {
     sd1 <- survival::survdiff(eval(survobj$call$formula),
@@ -110,19 +121,15 @@ plotSurv <- function(survobj,
                     paste(" p =", signif(p1, 3))
     )
     q <- q + annotate("text",
-                        x = max(df$time)*0.1,
-                        y = min(df$Survival),
-                        label = p1txt)
+                      x = max(df$time)*0.1,
+                      y = min(df$Survival),
+                      label = p1txt, 
+                      family = theme_get()$text$family,
+                      size = theme_get()$text$size*(5/14))
   }
   
-  
-  # If needed, custom legends
-  if (!is.null(legend.text)) {
-    q <- q + scale_colour_discrete(labels = legend.text) + 
-      scale_linetype_discrete(labels = legend.text)
-  }    
-  
-  q <- q + theme(axis.title.x = element_blank(), text = element_text(size = element.text.size))
+  #Add extra stuff to curve?
+  if (!is.null(ggargsCurve)) eval(parse(text=paste("q <- q +", ggargsCurve)))
   
   if (!makeTable) {
     return(q)
@@ -133,7 +140,7 @@ plotSurv <- function(survobj,
   #Extract appropiate times from survfit
   times <- ggplot_build(q)$panel$ranges[[1]]$x.minor_source  
   sum.obj <- summary(survobj, times=times, extend=TRUE)
-  
+  if ( (length(sum.obj$time) / length(categorias)) != length(times)) stop("ERROR: t<0 ?")
   #put data into a table
   table.df <- data.frame(grupo = rep(categorias, each=length(times)),
                          time = sum.obj$time,
@@ -152,7 +159,7 @@ plotSurv <- function(survobj,
    scale_y_discrete(breaks = (as.character(levels(table.df$grupo))), labels = (levels(table.df$grupo))) +
    scale_x_continuous(limits = xrange, breaks = times) +    
    theme(
-     text = element_text(size=17),
+     #text = element_text(size=17),
      #plot.background = element_blank(),
       panel.grid.major.y = element_blank(),
       panel.grid.minor.y = element_blank(),
@@ -173,8 +180,7 @@ plotSurv <- function(survobj,
   if (num.cat==1) {
     p <- p + theme(axis.text.y = element_blank(), axis.title.y = element_blank(), 
                    axis.ticks.y = element_blank(), text = element_text(size = element.text.size))
-  }  
-   
+  }     
     if (returnPlots) return(value = list(curve = q,table = p))  
     plotAlign(q,p)  
   }
@@ -194,7 +200,7 @@ plotAlign <- function(q,p) {
 }
 
 
-# Step geombibon stat for the CIs. copied from somewhere. by #jdnewmil @ https://groups.google.com/d/msg/ggplot2/9cFWHaH1CPs/STwRwSn1v0kJ 
+# Step geombibon stat for the CIs. copied from somewhere by #jdnewmil @ https://groups.google.com/d/msg/ggplot2/9cFWHaH1CPs/STwRwSn1v0kJ 
 stairstepn <- function( data, direction="hv", yvars="y" ) {
   direction <- match.arg( direction, c( "hv", "vh" ) )
   data <- as.data.frame( data )[ order( data$x ), ]
