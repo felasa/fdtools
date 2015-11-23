@@ -30,7 +30,9 @@ plotSurv <- function(survobj,
   if (num.cat > 1) {
     
     #Extraemos nombre de los grupos del objeto
-    categorias <- sapply(names(survobj$strata), function(x) substr(x,regexpr("=[^=]*$", x)+1,10000L), USE.NAMES=FALSE)
+    #categorias <- gsub(paste0(attr(terms(as.formula(survobj$call)), "term.labels"),"="), "", names(survobj$strata))
+    ll <- nchar(attr(terms(as.formula(survobj$call)), "term.labels"))
+    categorias <- substr(names(survobj$strata), ll+2, nchar(names(survobj$strata)))
     if (!is.null(legend.text)) categorias <- legend.text
     categorias <- factor(categorias, levels = categorias)
     
