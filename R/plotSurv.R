@@ -182,11 +182,41 @@ plotSurv <- function(survobj,
   if (num.cat==1) {
     p <- p + theme(axis.text.y = element_blank(), axis.title.y = element_blank(), 
                    axis.ticks.y = element_blank(), text = element_text(size = element.text.size))
-  }     
-    if (returnPlots) return(value = list(curve = q,table = p))  
-    plotAlign(q,p)  
+  }
+  
+  fdkm <- list(curve = q, table = p)
+  class(fdkm) <- c("fdkm", "gg")
+  return(fdkm)
+#    if (returnPlots) return(value = list(curve = q,table = p))  
+#    plotAlign(q,p)  
   }
 }
+
+print.fdkm <- function(fdkm) {
+  plotAlign(fdkm$curve, fdkm$table)
+}
+
+plot.fdkm <- function(fdkm) {
+  print.fkm
+}
+
+"+.fdkm" <- function(fdkm, thm) {
+  require(ggplot2)
+  if (inherits(fdkm, fdkm)) {
+  # Get the name of what was passed in as e2, and pass along so that it
+  # can be displayed in error messages
+  thmname <- deparse(substitute(thm))  
+  if (is.theme(thm))  { 
+    fdkm$curve <- (fdkm$curve + thm)
+    fdkm$table <- (fdkm$table + thm)
+    return(fdkm)
+  }
+  else stop("Can only add themes")
+  return(fdkm)
+  }
+  else stop("AAA")
+}
+
 
 ## Function used to align plots, separate in case needed
 
