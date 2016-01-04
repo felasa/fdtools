@@ -253,25 +253,18 @@ stairstepn <- function( data, direction="hv", yvars="y" ) {
   ) 
 }
 
-stat_stepribbon <- function( mapping = NULL, data  =NULL, geom = "ribbon", position = "identity" ) {
-  StatStepribbon$new( mapping = mapping, data = data, geom = geom, position = position )
-}
-require(proto)
-StatStepribbon <- proto(ggplot2:::Stat, {
-  objname <- "stepribbon"
-  desc <- "Stepwise area plot"
-  desc_outputs <- list(
-    x = "stepped independent variable",
-    ymin = "stepped minimum dependent variable",
-    ymax = "stepped maximum dependent variable"
+stat_stepribbon <- 
+  function(mapping = NULL, data = NULL, geom = "ribbon", position = "identity", inherit.aes = TRUE) {
+  ggplot2::layer(
+    stat = Stepribbon, mapping = mapping, data = data, geom = geom, 
+    position = position, inherit.aes = inherit.aes
   )
-  required_aes <- c( "x", "ymin", "ymax" )
-  
-  default_geom <- function(.) GeomRibbon
-  default_aes <- function(.) aes( x = ..x.., ymin = ..y.., ymax = Inf )
-  
-  calculate <- function( ., data, scales, direction = "hv", yvars = c( "ymin", "ymax" ), ...) {
-    stairstepn( data = data, direction = direction, yvars = yvars )
-  }
-  
-})
+}
+
+StatStepribbon <- 
+  ggproto("stepribbon", Stat,
+          compute_group = function(., data, scales, direction = "hv", yvars = c( "ymin", "ymax" ), ...) {
+                                   stairstepn( data = data, direction = direction, yvars = yvars )
+                          },                        
+                          required_aes = c( "x", "ymin", "ymax" )
+)
