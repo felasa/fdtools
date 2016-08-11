@@ -5,9 +5,9 @@ perc_change <- function(prev, current) {
 
 change_fun <- function(series, lag=1, fun=perc_change) {
   n <- length(series)
-  result <- numeric(n-1)
-  for(i in 1:(n-1)) {
-    result[i] <- fun(series[i], series[i+1])
+  result <- numeric(n-lag)
+  for(i in 1:(n-lag)) {
+    result[i] <- fun(series[i], series[i+lag])
   }
   result
 }
